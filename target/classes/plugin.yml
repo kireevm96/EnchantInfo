@@ -1,0 +1,10 @@
+name: EnchantInfo
+version: 1.0.0
+author: Kireevm
+main: ru.kireevm.Main
+softdepend: [EcoEnchants]
+api-version: 1.13
+commands:
+    einfo:
+        usage: /<command>
+        aliases: [eio]
