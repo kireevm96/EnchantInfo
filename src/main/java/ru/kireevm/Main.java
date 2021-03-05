@@ -8,23 +8,16 @@ import com.samjakob.spigui.SGMenu;
 import com.samjakob.spigui.SpiGUI;
 import com.samjakob.spigui.buttons.SGButton;
 import org.bukkit.inventory.meta.ItemMeta;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-import java.util.List;
 import org.bukkit.Bukkit;
+import java.util.stream.Collectors;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import com.willfp.ecoenchants.enchantments.EcoEnchants;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import java.util.Arrays;
-import com.willfp.ecoenchants.enchantments.EcoEnchant;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,28 +30,46 @@ import com.willfp.ecoenchants.display.EnchantmentCache;
 import com.samjakob.spigui.item.ItemBuilder;
 import com.willfp.ecoenchants.enchantments.meta.EnchantmentType;
 import com.willfp.ecoenchants.EcoEnchantsPlugin;
-import com.google.common.collect.ImmutableList;
-import com.willfp.eco.util.config.updating.annotations.ConfigUpdater;
-import com.willfp.eco.util.plugin.AbstractEcoPlugin;
-import com.willfp.ecoenchants.EcoEnchantsPlugin;
 import com.willfp.ecoenchants.enchantments.EcoEnchant;
-import com.willfp.ecoenchants.enchantments.itemtypes.Artifact;
-import com.willfp.ecoenchants.enchantments.itemtypes.Spell;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.bukkit.configuration.file.FileConfiguration;
+
 public class Main extends JavaPlugin implements Listener,
 CommandExecutor {
   private static SpiGUI spiGUI;
   
+  FileConfiguration config = getConfig();
+  
+  
   @Override
   public void onEnable() {
+    config.addDefault("site_enchant", true);
+    config.addDefault("page", "&cСтраница &c{currentPage} из {maxPage}");
+    config.addDefault("menumain", "&cЗачарования");
+    config.addDefault("backmain", "&6На главное меню");
+    config.addDefault("menuall", "&6Показать все чары");
+    config.addDefault("menunormal", "&6Показать обычные чары");
+    config.addDefault("menuartifact", "&6Показать эффекты");
+    config.addDefault("menucurse", "&6Показать проклятия");
+    config.addDefault("menuspecial", "&6Показать особые чары");
+    config.addDefault("menuspell", "&6Показать способности");
+    config.addDefault("menusite", "&6Сайт с чарами");
+    config.addDefault("menusitelore", "&bОткрывает сайт с чарами");
+    config.addDefault("siteurl", "http://omegamc.ru/enchants/");
+    config.addDefault("villager", "Житель: ");
+    config.addDefault("yes", "Да");
+    config.addDefault("no", "Нет");
+    config.addDefault("back", "&a&l\u2190 Назад");
+    config.addDefault("back_lore", "&aНажмите, чтобы вернуться к странице ");
+    config.addDefault("next", "&a&lВперед \u2192");
+    config.addDefault("next_lore", "&aНажмите, чтобы перейдти к странице ");
+    
+    config.options().copyDefaults(true);
+    saveConfig();
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
-    spiGUI = new SpiGUI(this);
+    spiGUI = new SpiGUI(this, config);
   }
   @Override
   public void onDisable() {
@@ -142,7 +153,7 @@ CommandExecutor {
     String finalTargets = allTargets;
     String finalConflicts = allConflicts;
     String finalMaxLevel = maxLevel;
-    String isVillage = "\n" + ChatColor.BLUE + "Житель: " + (enchantment.isAvailableFromVillager() ? ChatColor.GREEN + "Да" : ChatColor.RED + "Нет" );
+    String isVillage = "\n" + ChatColor.BLUE + config.getString("villager") + (enchantment.isAvailableFromVillager() ? ChatColor.GREEN + config.getString("yes") : ChatColor.RED + config.getString("no") );
     List < String > list = new ArrayList < String > ();
     Arrays.asList(PLUGIN.getLangYml().getString("messages.enchantinfo").split("\\r?\\n")).forEach((string ->{
       string = string.replace("%name%: ", "").replace("%description%", ChatColor.WHITE + finalDescription).replace("%target%", ChatColor.WHITE + finalTargets).replace("%conflicts%", ChatColor.WHITE + finalConflicts).replace("%maxlevel%", ChatColor.WHITE + finalMaxLevel + isVillage);
@@ -184,14 +195,14 @@ CommandExecutor {
     
              
       if (enchantList.size() > 0) {
-        SGMenu MenuAll = Main.spiGUI.create("&cСтраница &c{currentPage} из {maxPage}", 5);
+        SGMenu MenuAll = Main.spiGUI.create(config.getString("page"), 5);
         
         
-        SGMenu Menunormal = Main.spiGUI.create("&cСтраница &c{currentPage} из {maxPage}", 5);
-        SGMenu Menuartifact = Main.spiGUI.create("&cСтраница &c{currentPage} из {maxPage}", 5);
-        SGMenu Menucurse = Main.spiGUI.create("&cСтраница &c{currentPage} из {maxPage}", 5);
-        SGMenu Menuspecial = Main.spiGUI.create("&cСтраница &c{currentPage} из {maxPage}", 5);
-        SGMenu Menuspell = Main.spiGUI.create("&cСтраница &c{currentPage} из {maxPage}", 5);
+        SGMenu Menunormal = Main.spiGUI.create(config.getString("page"), 5);
+        SGMenu Menuartifact = Main.spiGUI.create(config.getString("page"), 5);
+        SGMenu Menucurse = Main.spiGUI.create(config.getString("page"), 5);
+        SGMenu Menuspecial = Main.spiGUI.create(config.getString("page"), 5);
+        SGMenu Menuspell = Main.spiGUI.create(config.getString("page"), 5);
 
 
         Menunormal.setAutomaticPaginationEnabled(true);
@@ -203,7 +214,7 @@ CommandExecutor {
         
 
         
-        SGMenu MenuMain = Main.spiGUI.create("&cЗачарования", 1);
+        SGMenu MenuMain = Main.spiGUI.create(config.getString("menumain"), 1);
         MenuMain.setAutomaticPaginationEnabled(false);
         for (EcoEnchant enchant: enchantList) {
           MenuAll.addButton(new SGButton(
@@ -240,7 +251,7 @@ CommandExecutor {
      
         SGButton main = new SGButton(
                 new ItemBuilder(Material.BARRIER)
-                    .name("&6На главное меню")
+                    .name(config.getString("backmain"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(MenuMain.getInventory());
@@ -255,58 +266,59 @@ CommandExecutor {
         Menuspecial.setButtonbut(49, true, main);
         Menuspell.setButtonbut(49, true, main); 
         
-        
-                
+                       
         MenuMain.setButton(0, 0, new SGButton(
                 new ItemBuilder(Material.ENCHANTED_BOOK)
-                    .name("&6Показать все чары")
+                    .name(config.getString("menuall"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(MenuAll.getInventory());
             }));
         MenuMain.setButton(0, 2, new SGButton(
                 new ItemBuilder(Material.ENCHANTED_BOOK)
-                    .name("&6Показать обычные чары")
+                    .name(config.getString("menunormal"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(Menunormal.getInventory());
             }));
         MenuMain.setButton(0, 3, new SGButton(
                 new ItemBuilder(Material.FIREWORK_STAR)
-                    .name("&6Показать эффекты")
+                    .name(config.getString("menuartifact"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(Menuartifact.getInventory());
             }));
         MenuMain.setButton(0, 4, new SGButton(
                 new ItemBuilder(Material.BOOK)
-                    .name("&6Показать проклятия")
+                    .name(config.getString("menucurse"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(Menucurse.getInventory());
             }));
         MenuMain.setButton(0, 5, new SGButton(
                 new ItemBuilder(Material.BEACON)
-                    .name("&6Показать особые чары")
+                    .name(config.getString("menuspecial"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(Menuspecial.getInventory());
             }));
         MenuMain.setButton(0, 6, new SGButton(
                 new ItemBuilder(Material.FIREWORK_ROCKET)
-                    .name("&6Показать способности")
+                    .name(config.getString("menuspell"))
                     .build()
             ).withListener(event -> {
                 event.getWhoClicked().openInventory(Menuspell.getInventory());
             }));
+        if (config.getBoolean("site_enchant")) {
          MenuMain.setButton(0, 8, new SGButton(
                 new ItemBuilder(Material.PAINTING)
-                    .name("&6Сайт с чарами")
-                    .lore("&bОткрывает сайт с чарами")
+                    .name(config.getString("menusite"))
+                    .lore(config.getString("menusitelore"))
                     .build()
             ).withListener(event -> {
-                event.getWhoClicked().sendMessage("http://omegamc.ru/enchants/");
-            }));       
+                event.getWhoClicked().sendMessage(config.getString("siteurl"));
+            }));
+        }
          p.openInventory(MenuMain.getInventory());
 
       } else {}

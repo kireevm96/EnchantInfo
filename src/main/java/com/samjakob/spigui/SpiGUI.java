@@ -9,9 +9,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.kireevm.Main;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.configuration.file.FileConfiguration;
 
 /**
  * A comprehensive GUI API for Spigot with pages support.<br>
@@ -23,7 +25,7 @@ import java.util.List;
 public class SpiGUI {
 
     private final JavaPlugin plugin;
-
+    FileConfiguration config;
     /**
      * Whether or not the inventory click actions should be
      * cancelled by default.
@@ -58,14 +60,13 @@ public class SpiGUI {
      * on either the inventory class ({@link SGMenu}) or your plugin's instance of
      * {@link SpiGUI}.
      */
+
     private SGPaginationButtonBuilder defaultPaginationButtonBuilder = (type, inventory) -> {
         switch (type) {
             case PREV_BUTTON:
                 if (inventory.getCurrentPage() > 0) return new SGButton(new ItemBuilder(Material.ARROW)
-                        .name("&a&l\u2190 Назад")
-                        .lore(
-                                "&aНажмите, чтобы вернуться к",
-                                "&aстранице " + inventory.getCurrentPage() + ".")
+                        .name(config.getString("back"))
+                        .lore(config.getString("back_lore") + inventory.getCurrentPage() + ".")
                         .build()
                 ).withListener(event -> {
                     event.setCancelled(true);
@@ -74,10 +75,8 @@ public class SpiGUI {
                 else return null;
             case NEXT_BUTTON:
                 if (inventory.getCurrentPage() < inventory.getMaxPage() - 1) return new SGButton(new ItemBuilder(Material.ARROW)
-                        .name("&a&lВперед \u2192")
-                        .lore(
-                                "&aНажмите, чтобы перейдти к",
-                                "&aстранице " + (inventory.getCurrentPage() + 2) + "."
+                        .name(config.getString("next"))
+                        .lore(config.getString("next_lore") + (inventory.getCurrentPage() + 2) + "."
                         ).build()
                 ).withListener(event -> {
                     event.setCancelled(true);
@@ -126,9 +125,9 @@ public class SpiGUI {
      *
      * @param plugin The plugin using SpiGUI.
      */
-    public SpiGUI(JavaPlugin plugin) {
+    public SpiGUI(JavaPlugin plugin, FileConfiguration config) {
         this.plugin = plugin;
-
+        this.config = config;
         plugin.getServer().getPluginManager().registerEvents(
             new SGMenuListener(plugin, this), plugin
         );
